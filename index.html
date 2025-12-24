@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>见字如面：灵魂书法家匹配</title>
+    <!-- 引入 html-to-image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. 基础重置与变量 --- */
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1D1D1F;
+            --text-sub: #86868B;
+            --accent-blue: #0047FF;
+            --accent-red: #FF3B30;
+            --border-color: #000000;
+            
+            --border-width: 3px;
+            --shadow-dist: 6px;
+            --radius: 12px;
+            
+            --font-serif: "Noto Serif SC", "Songti SC", serif;
+            --font-sans: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: linear-gradient(#E5E5EA 1px, transparent 1px), linear-gradient(90deg, #E5E5EA 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* --- 2. 主容器 --- */
+        .app-shell {
+            width: 100%;
+            max-width: 480px;
+            height: 800px;
+            background: var(--card-bg);
+            border: var(--border-width) solid var(--border-color);
+            box-shadow: var(--shadow-dist) var(--shadow-dist) 0px var(--border-color);
+            border-radius: var(--radius);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* 顶部导航区 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #F5F5F7;
+            margin-bottom: 20px;
+        }
+        .brand {
+            font-family: var(--font-serif);
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+        .version-tag {
+            font-size: 0.8rem;
+            background: var(--text-main);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-family: var(--font-serif);
+        }
+
+        /* --- 3. 通用组件 --- */
+        h1.display-title {
+            font-family: var(--font-serif);
+            font-size: 3.2rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin: 0 0 20px 0;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.05rem;
+            color: var(--text-sub);
+            line-height: 1.8;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        /* 输入框 */
+        .input-wrapper { margin-bottom: 30px; }
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.2rem;
+            font-family: var(--font-serif);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            background: #FAFAFA;
+            transition: all 0.2s;
+        }
+        input[type="text"]:focus {
+            background: #fff;
+            box-shadow: 4px 4px 0 var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        /* 按钮 */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #fff;
+            background-color: var(--border-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-family: var(--font-sans);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            background-color: var(--accent-blue);
+        }
+        .btn:active { transform: translateY(1px); }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: var(--border-width) solid var(--border-color);
+            margin-top: 15px;
+        }
+        .btn-outline:hover {
+            background: #F2F2F7;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* --- 4. 答题区 --- */
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: #E5E5EA;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--text-main);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .question-title {
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 30px;
+            min-height: 3.6em;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            padding-bottom: 10px;
+        }
+        .options-list::-webkit-scrollbar { display: none; }
+
+        .option-item {
+            background: #fff;
+            border: 2px solid #E5E5EA;
+            padding: 16px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            position: relative;
+        }
+        .option-item:hover {
+            border-color: var(--border-color);
+            background: #FAFAFA;
+            box-shadow: 3px 3px 0 var(--border-color);
+            transform: translate(-1px, -1px);
+        }
+
+        /* --- 5. 结果卡片 --- */
+        #capture-area {
+            background: #FFFFFF;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .result-card {
+            width: 100%;
+            height: auto;
+            background: #fff;
+            border: var(--border-width) solid var(--border-color);
+            padding: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            /* 增加内容分布控制，适应3:4比例 */
+            justify-content: space-between; 
+        }
+
+        .card-screw {
+            position: absolute;
+            top: 15px; left: 50%;
+            transform: translateX(-50%);
+            width: 12px; height: 12px;
+            background: var(--border-color);
+            border-radius: 50%;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-top: 10px;
+            border-bottom: 1px solid #E5E5EA;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cn-tag {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        
+        .cn-value {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        .artist-name {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--border-color);
+            line-height: 1.1;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .artist-name::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 6px;
+            background: var(--accent-red);
+            margin-top: 10px;
+        }
+
+        .tags-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .tag-pill {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .result-text {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+            font-weight: 400;
+            letter-spacing: 0.02em; 
+        }
+
+        .footer-logo {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 900;
+            font-family: var(--font-serif);
+            color: var(--text-main);
+            opacity: 0.8;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="app-shell" id="app-container">
+    <div class="header">
+        <div class="brand">笔墨心鉴</div>
+        <div class="version-tag">@观火斋</div>
+    </div>
+
+    <!-- 1. 初始界面 -->
+    <div id="start-screen" class="fade-in" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+        <h1 class="display-title">见字<br>如面</h1>
+        <p class="subtitle">字迹是心电图，记录灵魂的震颤。<br>通过七道笔墨抉择，<br>寻找那个与你跨越时空共鸣的古代宗师。</p>
+        
+        <div class="input-wrapper">
+            <label class="input-label">阁下的名讳 (CN)</label>
+            <input type="text" id="cn-input" placeholder="请输入..." maxlength="8" autocomplete="off">
+        </div>
+        
+        <button class="btn" onclick="startQuiz()">开启旅程</button>
+    </div>
+
+    <!-- 2. 答题界面 -->
+    <div id="quiz-screen" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
+            <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-sub);">笔墨分析中...</span>
+            <span id="question-count" style="font-family: var(--font-sans); font-weight: 700; font-size: 0.9rem;">01 / 07</span>
+        </div>
+        
+        <div class="progress-track"><div class="progress-bar" id="progress"></div></div>
+        
+        <div id="question-text" class="question-title">问题加载中...</div>
+        
+        <div id="options-container" class="options-list"></div>
+    </div>
+
+    <!-- 3. 结果界面 -->
+    <div id="result-screen" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+        
+        <!-- === 截图区域 === -->
+        <div id="capture-area">
+            <!-- 给卡片增加了 id="final-card" 方便 JS 定位 -->
+            <div class="result-card" id="final-card">
+                <div class="card-screw"></div>
+                
+                <div class="result-header">
+                    <!-- 修改：去除了 TESTED SUBJECT -->
+                    <div class="cn-tag">书写者</div>
+                    <div id="display-cn" class="cn-value">USER</div>
+                </div>
+
+                <div class="artist-name" id="result-name">名字</div>
+                
+                <div class="tags-wrapper" id="result-tags"></div>
+                
+                <div class="result-text" id="result-description">
+                    描述文案占位符。
+                </div>
+
+                <div class="footer-logo">@观火斋</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="btn" onclick="exportImage()" style="background: var(--text-main);">保存灵魂卡片</button>
+            <button class="btn btn-outline" onclick="restartQuiz()">重新测试</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let userCN = "无名氏";
+    
+    // 保持原有数据结构
+    const calligraphers = {
+        "王羲之": {
+            title: "王羲之",
+            tags: ["中和之美", "飘逸", "天资绝代"],
+            desc: "你的性格与审美处于最完美的平衡点。你不喜极端的束缚，也不追求无序的疯狂。如《兰亭序》般，在快乐与感伤间，在清醒与微醺间，你总能找到那个让所有人都舒服的“度”。",
+            scores: { elegance: 10, classic: 8, method: 6 } 
+        },
+        "颜真卿": {
+            title: "颜真卿",
+            tags: ["刚正不阿", "厚重", "大巧若拙"],
+            desc: "字如其人，你内心极其强大且正直。你讨厌花里胡哨的技巧，相信“大巧若拙”。你的笔触厚重宽博，做人做事讲究规矩与气节，给人以极强的安全感和信任感。",
+            scores: { method: 10, classic: 6, wild: 2 }
+        },
+        "张旭": {
+            title: "张旭",
+            tags: ["极度癫狂", "情绪化", "艺术灵魂"],
+            desc: "规矩对你来说就是用来打破的。你可能是个情绪化的人，但你的创造力也正源于此。状态来了，谁也挡不住；状态不好，谁也不想理。你是纯粹的艺术家。",
+            scores: { wild: 10, sharp: 7, zen: 3 }
+        },
+        "赵孟頫": {
+            title: "赵孟頫",
+            tags: ["全能通才", "唯美", "集大成者"],
+            desc: "你是标准的“六边形战士”。你追求唯美、流畅的视觉效果，讨厌生涩和尴尬。你性格温润，做事周全，勤奋且聪明，是世俗眼中最完美的榜样。",
+            scores: { classic: 10, elegance: 7, method: 8 }
+        },
+        "宋徽宗": {
+            title: "宋徽宗",
+            tags: ["锋芒毕露", "极致审美", "强迫症"],
+            desc: "你可能有强迫症，受不了任何拖泥带水。你的审美极度挑剔，喜欢极致的精致和锋利。哪怕与世界格格不入，你也要坚持自己的独特。你是天生的贵族审美。",
+            scores: { sharp: 10, method: 7, elegance: 5 }
+        },
+        "米芾": {
+            title: "米芾",
+            tags: ["八面出锋", "技术流", "老顽童"],
+            desc: "你是一个“技术控”。你非常聪明，甚至有点自负。你喜欢在细节上炫技，追求笔法的极致变化。你性格直率，爱憎分明，像个老顽童，对喜欢的事物极其痴迷。",
+            scores: { sharp: 9, wild: 7, classic: 6 }
+        },
+        "黄庭坚": {
+            title: "黄庭坚",
+            tags: ["长枪大戟", "禅意", "内力深厚"],
+            desc: "你是一个有精神洁癖的人。你喜欢拉长线条，构建独特的空间感，就像在纸上打太极。你的内心有一片宁静的修禅之地，外表看似随意，实则内力深厚。",
+            scores: { zen: 9, sharp: 8, method: 5 }
+        },
+        "董其昌": {
+            title: "董其昌",
+            tags: ["淡墨虚和", "高冷", "生拙"],
+            desc: "你极度厌恶“俗气”。你认为“熟”不如“生”，喜欢用淡墨表现清冷的高级感。你可能看起来云淡风轻，甚至有点冷漠，但那是你对精神自由的极致追求。",
+            scores: { zen: 10, elegance: 8, wild: 4 }
+        },
+        "徐渭": {
+            title: "徐渭",
+            tags: ["墨点泪痕", "悲剧", "呐喊"],
+            desc: "如果张旭是快乐的疯，你就是悲剧的狂。你的笔下是呐喊，是破碎，是墨点的肆意喷溅。你情感丰富且敏感，才华横溢却不被世俗理解。你的字，是灵魂的裸奔。",
+            scores: { wild: 10, zen: 6, method: 0 }
+        },
+        "祝枝山": {
+            title: "祝枝山",
+            tags: ["才气纵横", "潇洒", "人间清醒"],
+            desc: "你比张旭多了一份功力，比赵孟頫多了一份野性。你能写工整的小楷，也能写满纸云烟的狂草。你是世俗与艺术的完美结合体，活得潇洒，玩得转人间。",
+            scores: { wild: 8, classic: 9, method: 7 }
+        },
+        "白蕉": {
+            title: "白蕉",
+            tags: ["魏晋风骨", "温润", "隐士"],
+            desc: "在现代社会中，你保留着最后一份古典文人的纯粹。你的字没有火气，干干净净，温润如玉。你像一位隐士，不争不抢，只在纸上留下一抹淡淡的兰花香。",
+            scores: { elegance: 9, zen: 7, classic: 6 }
+        },
+        "沈尹默": {
+            title: "沈尹默",
+            tags: ["入规入矩", "严谨", "学者风范"],
+            desc: "你是一个严谨的学者。你相信通过努力和正确的方法可以达到顶峰。你的字笔笔有来历，结构严谨，不做作，不怪异。你是秩序的守护者，是教科书般的标准。",
+            scores: { method: 9, classic: 8, elegance: 5 }
+        }
+    };
+
+    const questions = [
+        {
+            text: "墨色：你更喜欢哪种视觉质感？",
+            options: [
+                { text: "浓墨重彩，乌黑发亮，要有精神。", score: { method: 3, classic: 2 } },
+                { text: "淡墨清雅，甚至带点干枯的飞白。", score: { zen: 4, elegance: 2 } },
+                { text: "泼墨淋漓，模糊成一片才过瘾。", score: { wild: 4, zen: 1 } },
+                { text: "讲究变化，一笔之中要有浓淡枯湿。", score: { sharp: 3, classic: 2 } }
+            ]
+        },
+        {
+            text: "速度：你写字时的节奏通常是？",
+            options: [
+                { text: "慢。像打太极，在空中还要比划动作。", score: { zen: 3, method: 2 } },
+                { text: "快！如狂风暴雨，根本停不下来。", score: { wild: 4 } },
+                { text: "不紧不慢，行云流水，该停就停。", score: { elegance: 4, classic: 2 } },
+                { text: "顿挫感强，像在刻石头，咔咔作响。", score: { sharp: 4, method: 1 } }
+            ]
+        },
+        {
+            text: "结构：你认为什么是“好看”的字？",
+            options: [
+                { text: "平正端庄，四平八稳才是正道。", score: { method: 4, classic: 2 } },
+                { text: "必须要险！歪着倒着，似倒非倒最妙。", score: { sharp: 4, zen: 2 } },
+                { text: "无所谓结构，连绵不断的气势最重要。", score: { wild: 4, elegance: 1 } },
+                { text: "疏朗通透，字距要大，留白要多。", score: { zen: 4, elegance: 2 } }
+            ]
+        },
+        {
+            text: "态度：你对待“法度”（规矩）的看法？",
+            options: [
+                { text: "法度是基础，没有规矩不成方圆。", score: { method: 5, classic: 3 } },
+                { text: "先学规矩，然后把规矩踩在脚下。", score: { sharp: 3, wild: 2 } },
+                { text: "宁拙毋巧，太完美的规矩反而俗气。", score: { zen: 5, wild: 1 } },
+                { text: "规矩在心中，手下自然流露，不刻意。", score: { elegance: 4, classic: 2 } }
+            ]
+        },
+        {
+            text: "工具：如果只给你一支笔，你选？",
+            options: [
+                { text: "长锋羊毫，软软的，写出绵延的感觉。", score: { zen: 3, elegance: 2 } },
+                { text: "硬毫/兼毫，要弹力强，能写出锋芒。", score: { sharp: 4, method: 2 } },
+                { text: "抓起什么用什么，甚至想用拖把写。", score: { wild: 5 } },
+                { text: "趁手的就好，不挑笔，全看功力。", score: { classic: 4 } }
+            ]
+        },
+        {
+            text: "情绪：你最容易写出好作品的状态是？",
+            options: [
+                { text: "悲愤、痛苦或极度压抑时。", score: { wild: 3, zen: 2 } },
+                { text: "喝醉了，微醺或者大醉。", score: { wild: 4, elegance: 2 } },
+                { text: "窗明几净，焚香静坐，心如止水。", score: { method: 3, zen: 3 } },
+                { text: "与朋友切磋，或者为了展示才华时。", score: { classic: 3, sharp: 2 } }
+            ]
+        },
+        {
+            text: "哲学：你更认同哪句话？",
+            options: [
+                { text: "书者，散也。欲书先散怀抱。", score: { elegance: 4, wild: 2 } },
+                { text: "用笔在心，心正则笔正。", score: { method: 5 } },
+                { text: "字无百日功，一日不练手生。", score: { classic: 5 } },
+                { text: "我书意造本无法，点画信手烦推求。", score: { sharp: 4, zen: 2 } }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userScores = { method: 0, wild: 0, elegance: 0, sharp: 0, zen: 0, classic: 0 };
+
+    function startQuiz() {
+        const input = document.getElementById('cn-input');
+        if (input.value.trim() !== "") {
+            userCN = input.value.trim();
+        } else {
+            alert("请留下阁下的名讳 (CN)");
+            return;
+        }
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('quiz-screen').classList.add('fade-in');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('question-count').innerText = `0${currentQuestionIndex + 1} / 0${questions.length}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = ''; 
+
+        const progress = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById('progress').style.width = progress + '%';
+
+        q.options.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'option-item';
+            btn.innerText = opt.text;
+            btn.onclick = () => handleAnswer(opt.score);
+            container.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(scoreDelta) {
+        for (let key in scoreDelta) {
+            if (userScores.hasOwnProperty(key)) {
+                userScores[key] += scoreDelta[key];
+            }
+        }
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            setTimeout(renderQuestion, 200);
+        } else {
+            document.getElementById('progress').style.width = '100%';
+            setTimeout(showResult, 400);
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('result-screen').classList.add('fade-in');
+
+        let bestMatch = null;
+        let highestScore = -Infinity;
+
+        for (let name in calligraphers) {
+            let cData = calligraphers[name];
+            let currentMatchScore = 0;
+            for (let dim in cData.scores) {
+                let cScore = cData.scores[dim] || 0;
+                let uScore = userScores[dim] || 0;
+                currentMatchScore += cScore * uScore;
+            }
+            if (currentMatchScore > highestScore) {
+                highestScore = currentMatchScore;
+                bestMatch = cData;
+            }
+        }
+
+        if (bestMatch) {
+            document.getElementById('display-cn').innerText = userCN;
+            document.getElementById('result-name').innerText = bestMatch.title;
+            document.getElementById('result-description').innerText = bestMatch.desc;
+            
+            const tagsContainer = document.getElementById('result-tags');
+            tagsContainer.innerHTML = '';
+            bestMatch.tags.forEach(tag => {
+                const span = document.createElement('div');
+                span.className = 'tag-pill';
+                span.innerText = "#" + tag;
+                tagsContainer.appendChild(span);
+            });
+        }
+    }
+
+    // --- 修改：强制3:4比例导出 ---
+    function exportImage() {
+        // 直接选中卡片元素
+        const node = document.getElementById('final-card');
+        
+        const config = {
+            quality: 1.0,
+            pixelRatio: 3, // 高清
+            backgroundColor: '#ffffff', // 确保背景白
+            cacheBust: true,
+            style: {
+                // 强制导出尺寸为 3:4 (480px : 640px)
+                width: '480px',
+                height: '640px',
+                // 使用 Flex 布局让内容自适应分布，填满3:4的空间
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                padding: '40px', // 增加一点内边距让图片更好看
+                margin: '0',
+                borderRadius: '0', // 图片不需要圆角
+                border: '3px solid #000', // 保持野兽派边框
+                boxShadow: 'none' // 图片里不需要阴影
+            }
+        };
+
+        htmlToImage.toPng(node, config)
+            .then(function (dataUrl) {
+                const link = document.createElement('a');
+                link.download = `见字如面_${userCN}_${new Date().getTime()}.png`;
+                link.href = dataUrl;
+                link.click();
+            })
+            .catch(function (error) {
+                console.error('oops, something went wrong!', error);
+                alert('图片生成出错，请重试。');
+            });
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        userScores = { method: 0, wild: 0, elegance: 0, sharp: 0, zen: 0, classic: 0 };
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
+        document.getElementById('cn-input').value = '';
+    }
+</script>
+
+</body>
+</html>
